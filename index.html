@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ultraviolet Proxy</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+    }
+    .container {
+      text-align: center;
+    }
+    input[type="text"] {
+      width: 80%;
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      margin-bottom: 10px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Ultraviolet Proxy</h1>
+    <input id="searchBox" type="text" placeholder="Enter a URL or search term">
+    <button onclick="redirect()">Go</button>
+  </div>
+  <script>
+    const ultravioletBaseUrl = "https://your-ultraviolet-host.com/service/";
+
+    function redirect() {
+      const input = document.getElementById("searchBox").value.trim();
+      let url;
+
+      // Add "https://" if input doesn't start with "http://" or "https://"
+      if (!input.startsWith("http://") && !input.startsWith("https://")) {
+        url = `https://${input}`;
+      } else {
+        url = input;
+      }
+
+      // Redirect through Ultraviolet
+      window.location.href = `${ultravioletBaseUrl}${encodeURIComponent(url)}`;
+    }
+  </script>
+</body>
+</html>
