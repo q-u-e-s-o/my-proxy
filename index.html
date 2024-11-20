@@ -1,67 +1,68 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ultraviolet Proxy</title>
-  <style>
-    body {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background-color: #f4f4f4;
-    }
-    .container {
-      text-align: center;
-    }
-    input[type="text"] {
-      width: 80%;
-      padding: 10px;
-      font-size: 16px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      margin-bottom: 10px;
-    }
-    button {
-      padding: 10px 20px;
-      font-size: 16px;
-      background-color: #007bff;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #0056b3;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proxy Browser</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        #searchBox {
+            width: 50%;
+            padding: 10px;
+            font-size: 16px;
+        }
+        #goButton {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+        #iframeContainer {
+            margin-top: 20px;
+            width: 100%;
+            height: 80vh;
+        }
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Ultraviolet Proxy</h1>
-    <input id="searchBox" type="text" placeholder="Enter a URL or search term">
-    <button onclick="redirect()">Go</button>
-  </div>
-  <script>
-    const ultravioletBaseUrl = "https://your-ultraviolet-host.com/service/";
+    <h1>Proxy Browser</h1>
+    <input id="searchBox" type="text" placeholder="Enter website URL" />
+    <button id="goButton">Go</button>
+    <div id="iframeContainer">
+        <iframe id="proxyIframe" src="" sandbox="allow-scripts allow-same-origin"></iframe>
+    </div>
 
-    function redirect() {
-      const input = document.getElementById("searchBox").value.trim();
-      let url;
+    <script>
+        const baseUrl = "https://your-ultraviolet-instance.com/service/"; // Replace with your Ultraviolet base URL
+        
+        document.getElementById("goButton").addEventListener("click", () => {
+            const searchBox = document.getElementById("searchBox");
+            let userInput = searchBox.value.trim();
 
-      // Add "https://" if input doesn't start with "http://" or "https://"
-      if (!input.startsWith("http://") && !input.startsWith("https://")) {
-        url = `https://${input}`;
-      } else {
-        url = input;
-      }
+            // Add "https://" if not already present
+            if (!userInput.startsWith("http://") && !userInput.startsWith("https://")) {
+                userInput = "https://" + userInput;
+            }
 
-      // Redirect through Ultraviolet
-      window.location.href = `${ultravioletBaseUrl}${encodeURIComponent(url)}`;
-    }
-  </script>
+            // Generate the proxied URL
+            const proxiedUrl = baseUrl + encodeURIComponent(userInput);
+
+            // Set the iframe's source to the proxied URL
+            document.getElementById("proxyIframe").src = proxiedUrl;
+        });
+    </script>
 </body>
 </html>
