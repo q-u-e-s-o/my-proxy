@@ -81,6 +81,21 @@
       height: calc(100vh - 50px); /* Remaining height after tabs and search bar */
       border: none;
     }
+
+    #newTabBtn {
+      padding: 5px 15px;
+      background-color: #28a745;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+      border-radius: 4px;
+      margin-right: 10px;
+    }
+
+    #newTabBtn:hover {
+      background-color: #218838;
+    }
   </style>
 </head>
 <body>
@@ -104,11 +119,13 @@
       });
     }
 
+    // Function to create a new tab
     function createNewTab() {
       const newIndex = tabs.length;
       createTab('', newIndex, '');
     }
 
+    // Function to create a tab
     function createTab(url, index, searchQuery) {
       const tabContainer = document.getElementById('tabsContainer');
       
@@ -131,6 +148,7 @@
       saveTabsToStorage();
     }
 
+    // Function to close a tab
     function closeTab(index) {
       tabs.splice(index, 1);
       document.getElementById('tabsContainer').children[index].remove();
@@ -140,6 +158,7 @@
       saveTabsToStorage();
     }
 
+    // Function to switch between tabs
     function switchTab(index) {
       currentTabIndex = index;
       
@@ -151,11 +170,19 @@
         <input id="searchInput" type="text" value="${searchQuery}" placeholder="Enter URL...">
         <button onclick="loadPage()">Go</button>
       `;
-      
+
+      // Add event listener for 'Enter' key press in the search input
+      document.getElementById('searchInput').addEventListener('keypress', function(event) {
+        if (event.key === 'Enter') {
+          loadPage();
+        }
+      });
+
       // Load the saved URL of the tab
       document.getElementById('proxyFrame').src = tabs[index].url;
     }
 
+    // Function to load the page based on the search input
     function loadPage() {
       const input = document.getElementById('searchInput').value.trim();
       const iframe = document.getElementById('proxyFrame');
@@ -176,6 +203,7 @@
       saveTabsToStorage();
     }
 
+    // Function to update tabs after closing a tab
     function updateTabsAfterClose(index) {
       const tabContainer = document.getElementById('tabsContainer');
       const allTabs = tabContainer.children;
@@ -185,6 +213,7 @@
       }
     }
 
+    // Function to save tabs to sessionStorage
     function saveTabsToStorage() {
       sessionStorage.setItem('tabs', JSON.stringify(tabs));
     }
