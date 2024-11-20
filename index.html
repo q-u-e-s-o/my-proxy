@@ -1,68 +1,193 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Proxy Browser</title>
-    <style>
-        body {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            margin: 0;
-            font-family: Arial, sans-serif;
-        }
-        #searchBox {
-            width: 50%;
-            padding: 10px;
-            font-size: 16px;
-        }
-        #goButton {
-            padding: 10px 20px;
-            font-size: 16px;
-            margin-top: 10px;
-            cursor: pointer;
-        }
-        #iframeContainer {
-            margin-top: 20px;
-            width: 100%;
-            height: 80vh;
-        }
-        iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Proxy Tabs</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    .tabs-container {
+      display: flex;
+      background-color: #f4f4f4;
+      padding: 10px 20px;
+      box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .tab {
+      margin-right: 10px;
+      padding: 5px 15px;
+      background-color: #007BFF;
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+    }
+
+    .tab:hover {
+      background-color: #0056b3;
+    }
+
+    .tab button {
+      margin-left: 10px;
+      padding: 2px 5px;
+      font-size: 12px;
+      background-color: #ff4d4d;
+      border: none;
+      color: white;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+
+    .search-container {
+      display: flex;
+      align-items: center;
+      flex-grow: 1;
+      margin-left: 20px;
+    }
+
+    .search-container input[type="text"] {
+      flex: 1;
+      padding: 5px 10px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    .search-container button {
+      margin-left: 10px;
+      padding: 5px 15px;
+      font-size: 14px;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .search-container button:hover {
+      background-color: #0056b3;
+    }
+
+    iframe {
+      width: 100%;
+      height: calc(100vh - 50px); /* Remaining height after tabs and search bar */
+      border: none;
+    }
+  </style>
 </head>
 <body>
-    <h1>Proxy Browser</h1>
-    <input id="searchBox" type="text" placeholder="Enter website URL" />
-    <button id="goButton">Go</button>
-    <div id="iframeContainer">
-        <iframe id="proxyIframe" src="" sandbox="allow-scripts allow-same-origin"></iframe>
-    </div>
+  <div class="tabs-container" id="tabsContainer">
+    <button id="newTabBtn" onclick="createNewTab()">+ New Tab</button>
+  </div>
 
-    <script>
-        const baseUrl = "https://your-corrosion-instance.com/service/"; // Replace with your Ultraviolet base URL
-        
-        document.getElementById("goButton").addEventListener("click", () => {
-            const searchBox = document.getElementById("searchBox");
-            let userInput = searchBox.value.trim();
+  <div class="search-container" id="searchContainer"></div>
+  
+  <iframe id="proxyFrame" src=""></iframe>
 
-            // Add "https://" if not already present
-            if (!userInput.startsWith("http://") && !userInput.startsWith("https://")) {
-                userInput = "https://" + userInput;
-            }
+  <script>
+    let currentTabIndex = 0;
+    const tabs = [];
 
-            // Generate the proxied URL
-            const proxiedUrl = baseUrl + encodeURIComponent(userInput);
+    // Load saved tabs from sessionStorage if any
+    window.onload = function() {
+      const savedTabs = JSON.parse(sessionStorage.getItem('tabs')) || [];
+      savedTabs.forEach((tab, index) => {
+        createTab(tab.url, index, tab.searchQuery);
+      });
+    }
 
-            // Set the iframe's source to the proxied URL
-            document.getElementById("proxyIframe").src = proxiedUrl;
-        });
-    </script>
+    function createNewTab() {
+      const newIndex = tabs.length;
+      createTab('', newIndex, '');
+    }
+
+    function createTab(url, index, searchQuery) {
+      const tabContainer = document.getElementById('tabsContainer');
+      
+      // Create tab button
+      const tab = document.createElement('div');
+      tab.classList.add('tab');
+      tab.innerHTML = `
+        <span>Tab ${index + 1}</span>
+        <button onclick="closeTab(${index})">x</button>
+      `;
+      tab.addEventListener('click', () => switchTab(index));
+
+      tabContainer.appendChild(tab);
+      
+      // Store the tab information
+      tabs.push({ url, searchQuery });
+      switchTab(index); // Switch to the new tab
+
+      // Save the tabs to sessionStorage
+      saveTabsToStorage();
+    }
+
+    function closeTab(index) {
+      tabs.splice(index, 1);
+      document.getElementById('tabsContainer').children[index].remove();
+
+      // Reorder tabs and update sessionStorage
+      updateTabsAfterClose(index);
+      saveTabsToStorage();
+    }
+
+    function switchTab(index) {
+      currentTabIndex = index;
+      
+      // Show the search bar and iframe for the selected tab
+      const searchContainer = document.getElementById('searchContainer');
+      const searchQuery = tabs[index].searchQuery;
+
+      searchContainer.innerHTML = `
+        <input id="searchInput" type="text" value="${searchQuery}" placeholder="Enter URL...">
+        <button onclick="loadPage()">Go</button>
+      `;
+      
+      // Load the saved URL of the tab
+      document.getElementById('proxyFrame').src = tabs[index].url;
+    }
+
+    function loadPage() {
+      const input = document.getElementById('searchInput').value.trim();
+      const iframe = document.getElementById('proxyFrame');
+      let url = input;
+
+      // Add "https://" if the input doesn't already include it
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        url = 'https://' + url;
+      }
+
+      // Update the URL for the current tab and the iframe
+      tabs[currentTabIndex].url = url;
+      tabs[currentTabIndex].searchQuery = input;
+      
+      iframe.src = url;
+
+      // Save the state to sessionStorage
+      saveTabsToStorage();
+    }
+
+    function updateTabsAfterClose(index) {
+      const tabContainer = document.getElementById('tabsContainer');
+      const allTabs = tabContainer.children;
+      for (let i = index; i < allTabs.length; i++) {
+        allTabs[i].innerHTML = `Tab ${i + 1} <button onclick="closeTab(${i})">x</button>`;
+        allTabs[i].addEventListener('click', () => switchTab(i));
+      }
+    }
+
+    function saveTabsToStorage() {
+      sessionStorage.setItem('tabs', JSON.stringify(tabs));
+    }
+  </script>
 </body>
 </html>
