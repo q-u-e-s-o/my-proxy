@@ -22,7 +22,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: url('red-bubbles.jpg') no-repeat center center fixed;
+      background: url('red bubbles.jpg') no-repeat center center fixed;
       background-size: cover;
       filter: blur(10px); /* Only blur the background */
       z-index: -1; /* Push background behind the content */
@@ -146,7 +146,74 @@
   <iframe id="proxyFrame" src=""></iframe>
 
   <script>
-    // Your existing JavaScript logic remains unchanged
+    let currentTabIndex = 0;
+    const tabs = [];
+
+    // Function to create a new tab
+    function createNewTab() {
+      const newIndex = tabs.length;
+      createTab('', newIndex, '');
+    }
+
+    // Function to create a tab
+    function createTab(url, index, searchQuery) {
+      const tabContainer = document.getElementById('tabsContainer');
+      
+      // Create tab button
+      const tab = document.createElement('div');
+      tab.classList.add('tab');
+      tab.innerHTML = `
+        <span>Micah</span>  <!-- All tabs are named 'Micah' -->
+        <button onclick="closeTab(${index})">x</button>
+      `;
+      tab.addEventListener('click', () => switchTab(index));
+
+      tabContainer.appendChild(tab);
+      
+      // Store the tab information
+      tabs.push({ url, searchQuery });
+      switchTab(index); // Switch to the new tab
+    }
+
+    // Function to close a tab
+    function closeTab(index) {
+      tabs.splice(index, 1);
+      const tabContainer = document.getElementById('tabsContainer');
+      tabContainer.children[index + 1].remove(); // Skip new tab button
+    }
+
+    // Function to switch between tabs
+    function switchTab(index) {
+      currentTabIndex = index;
+      const searchContainer = document.getElementById('searchContainer');
+      searchContainer.innerHTML = `
+        <input id="searchInput" type="text" value="${tabs[index].searchQuery || ''}" placeholder="Enter URL...">
+        <button onclick="loadPage()">Go</button>
+      `;
+
+      document.getElementById('searchInput').addEventListener('keypress', function(event) {
+        if (event.key === 'Enter') {
+          loadPage();
+        }
+      });
+
+      document.getElementById('proxyFrame').src = tabs[index].url || '';
+    }
+
+    // Function to load the page based on the search input
+    function loadPage() {
+      const input = document.getElementById('searchInput').value.trim();
+      const iframe = document.getElementById('proxyFrame');
+      let url = input;
+
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        url = 'https://search.yahoo.com/search?p=' + encodeURIComponent(url);
+      }
+
+      tabs[currentTabIndex].url = url;
+      tabs[currentTabIndex].searchQuery = input;
+      iframe.src = url;
+    }
   </script>
 </body>
 </html>
