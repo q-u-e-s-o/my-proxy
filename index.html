@@ -5,47 +5,53 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Micah's Proxy</title> <!-- Set the title to Micah's Proxy -->
   <style>
+    /* Reset and basic layout */
     body {
       margin: 0;
       font-family: Arial, sans-serif;
       display: flex;
       flex-direction: column;
       height: 100vh;
-      background: url('red bubbles.jpg') no-repeat center center fixed;
-      background-size: cover;
-      filter: blur(10px);
       overflow: hidden;
-      position: relative;
     }
 
-    /* Add a dark overlay for better readability of UI */
-    body::before {
-      content: '';
-      position: absolute;
+    /* Blurred background setup */
+    .background {
+      position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0, 0, 0, 0.6); /* Black overlay with transparency */
-      z-index: 0;
+      background: url('red-bubbles.jpg') no-repeat center center fixed;
+      background-size: cover;
+      filter: blur(10px); /* Only blur the background */
+      z-index: -1; /* Push background behind the content */
     }
 
-    .tabs-container,
-    .search-container {
-      z-index: 1; /* Ensure the UI is above the blurred background */
+    /* Dark overlay for better readability */
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6); /* Semi-transparent black overlay */
+      z-index: 0; /* Still behind the content */
     }
 
+    /* Foreground content */
     .tabs-container {
       display: flex;
-      background-color: #1a1a1a; /* Dark theme for tabs */
+      background-color: #1a1a1a;
       padding: 10px 20px;
       box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.5);
+      z-index: 1; /* Content above the background */
     }
 
     .tab {
       margin-right: 10px;
       padding: 5px 15px;
-      background-color: #ff4d4d; /* Red tabs */
+      background-color: #ff4d4d;
       color: white;
       border-radius: 4px;
       cursor: pointer;
@@ -54,7 +60,7 @@
     }
 
     .tab:hover {
-      background-color: #d94343; /* Darker red on hover */
+      background-color: #d94343;
     }
 
     .tab button {
@@ -74,6 +80,7 @@
       flex-grow: 1;
       margin-left: 20px;
       color: white;
+      z-index: 1;
     }
 
     .search-container input[type="text"] {
@@ -98,14 +105,14 @@
     }
 
     .search-container button:hover {
-      background-color: #d94343; /* Darker red on hover */
+      background-color: #d94343;
     }
 
     iframe {
       width: 100%;
       height: calc(100vh - 50px); /* Remaining height after tabs and search bar */
       border: none;
-      z-index: 1; /* Ensure iframe appears above background */
+      z-index: 1;
     }
 
     #newTabBtn {
@@ -125,6 +132,11 @@
   </style>
 </head>
 <body>
+  <!-- Background elements -->
+  <div class="background"></div>
+  <div class="overlay"></div>
+
+  <!-- Foreground content -->
   <div class="tabs-container" id="tabsContainer">
     <button id="newTabBtn" onclick="createNewTab()">+ New Tab</button>
   </div>
